@@ -1,0 +1,109 @@
+Chapter 4:Implementation
+4.1 Preprocessing:
+4.1.1 Dataset collection:
+We are going to use popular movie subtitle corpus which is”Cornell movie subtitle corpus”. This corpus contains a metadata-rich large collection of conversations extracted from raw movie scripts from popular movies.The following are found in the corpus: - 220,579 conversational exchanges between 10,292 pairs of movie characters. - Involves 9,035 characters from 617 movies - In total 304,713 utterances Other movie meta-data included genres, release year, IMDB rating, number of IMDB votes, IMDB rating.
+4.1.2 Data Preprocessing:
+Conversation data in the movie corpus contained Movie ID, Character ID, and Movie Line ID was separated by”+++++”. For preprocessing, conversation data were cleaned to remove this meta-data (eg. movie ID, character ID, Line ID). Also, data separators (”+++++”) were eliminated. Additionally, some of the characters in the data contained an unsupported encoding format by UTF-8 standard and hence was removed. Finally, data were separated into two different lists to assimilate with the format of Sequence to Sequence model (Seq2Seq) model input pipeline format where first list is the dialogue 1(or questions) and the second one was the response to dialogue 1(or answer). After separating the two lists, data in both was cleaned simultaneously. Everything except alphabetical character and some punctuation (. , ?!’) was removed as they hold little meaning in conversation. Also, all the text was converted to lowercase. Then, multiple consequent occurrences of this punctuation (. , ?!’) was reduced to one in order to reduce punctuation overload. Next, all the punctuation except (’) was separated with a single space before and after for better performance in the Sequence to Sequence model (Seq2Seq) module. Finally, all the consequent multiple spaces were reduced to single space and each text string was trimmed to remove before and after space. Also, data was cleaned for removing extraneous dialogues. If multiple consequent utterances from a single person were present everything except the last utterance for the person was stored. Filter the question and answers that are too short or long (here I used 2 as my minimum length and 5 as my maximum length) i.e. the sentence with 2 to 5 words are taken into account. The most frequent 6282 words in the training data were kept as vocabulary. Additionally the <PAD> token was used for padding input sequences to same lengths, the <EOS> token was used to signal the end of an utterance and the <UNK> token was used to replace all words not present in the vocabulary. <GO> was given to the start of the sentence. In total this gives a vocabulary size of 6286. Before training, we work on the dataset to convert the variable length sequences into fixed length sequences, by padding. We use a few special symbols to fill in the sequence. Consider the following query-response pair. Q: How are you? A: I am fine. Assuming that we would like our sentences (queries and responses) to be of fixed length, 10, this pair will be converted to:
+Artificial Intelligence, IA School/University, 25 May 2020, Boulogne-Billancourt, France
+13 Q: [PAD, PAD, PAD, PAD, PAD, PAD, “?”, “you”, “are”, “How”] A: [GO, “I”, “am”, “fine”, “.”, EOS, PAD, PAD, PAD, PAD] Introduction of padding did solve the problem of variable length sequences, but consider the case of large sentences. If the largest sentence in our dataset is of length 100, we need to encode all our sentences to be of length 100, in order to not lose any words. Now, what happens to “How are you?”? There will be 97 PAD symbols in the encoded version of the sentence. This will overshadow the actual information in the sentence. Bucketing kind of solves this problem, by putting sentences into buckets of different sizes. Consider this list of buckets: [(5, 10), (10, 15), (20, 25), (40, 50)]. If the length of a query is 4 and the length of its response is 4 (as in our previous example), we put this sentence in the bucket (5, 10). The query will be padded to length 5 and the response will be padded to length 10. While running the model (training or predicting), we use a different model for each bucket, compatible with the lengths of query and response. All these models share the same parameters and hence function exactly the same way. If we are using the bucket (5, 10), our sentences will be encoded to: Q: [PAD, “?”, “you”, “are”, “How”] A: [GO, “I”, “am”, “fine”, “.”, EOS, PAD, PAD, PAD, PAD] Word Embedding is a technique for learning dense representation of words in a low dimensional vector space. Each word can be seen as a point in this space, represented by a fixed length vector. Semantic relations between words are captured by this technique. The word vectors have some interesting properties. Paris – France + Poland = Warsaw. The vector difference between Paris and France captures the concept of capital city. Word Embedding is typically done in the first layer of the network: Embedding layer, that maps a word (index to word in vocabulary) from vocabulary to a dense vector of given size. In the seq2seq model, the weights of the embedding layer are jointly trained with the other parameters of the model.
+
+4.2 Seq2Seq Model with Attention mechanism:
+4.2.1 Algorithm development:
+The algorithm to develop the model and evaluate are:
+- Start
+- Load the dataset from the official repository and importing all the necessary packages.
+- Preprocessing of dataset with removing punctuations and stopwords and appending necessary tokens and filtering the dataset based on threshold length needed and frequency of words. 
+- Building vocabulary dictionary,segregating dataset to question and answer and building dictionary for that and forming index to vocabulary dictionary and vocabulary to index dictionary.
+- Transforming the dataset to embedding vectors/features using word2vec and the embedding lookup is done to map the vocabulary dictionary to fed into encoder and decoder part of the model.
+- Building the encoder model with Bi-directional LSTM with their hidden states collectively fed into the attention model which is a feedforward neural network with a fixed window size with some weights.
+- Building the decoder model with Uni-LSTM with context vectors from the attention mechanism is fed into the decoder model and corresponding outputs are generated with the use of decoder initial state and context vectors.
+- Building the Bahdanau Attention model with their inputs from the encoder hidden states and generating the context vectors from a fixed window size.
+- Configuring the model with Adam optimizer and Sequence loss function and configuring the parameters such as rnn size,embedding size, batch size,epochs,learning rate,etc.
+- Splitting the dataset into train and test dataset with question dictionary fed into encoder model and answer dictionary fed into the decoder model and preparing the validation dataset based on the batch size metioned.
+- Training the seq2seq model with feeding the data with the help of embedding vectors to predict the correct output.
+- Compute the accuracy and loss by comparing the output generarted with the true words.
+- Update the parameters of the model until minimal loss is achieved.
+- Testing the model with validation data with feeding the validation data sentences and predicting the output with the true words and measuring the bleu score.
+- High bleu score measures the accuracy of the model.
+- End
+
+4.2.2 Implementation Environment:
+In this project, we used tensorflow V1.14.0 to develop seq2seq model.Seq2Seq is industry standard choice for dialogue generation and many NLP tasks. It was coming from the tensorflow Seq2Seq contribution API. But also reasonably it is removed and no more accessible with recent tensorflow V2.X.But still the Seq2Seq API is accessible via tensorflow-addon package. Also to improve the model performance using state of art technique proposed by many research paper. In Seq2Seq models we can have options of attention mechanism, Beam search, bidirectionalRNN module.We have implemented attention mechanism with the Seq2Seq model for getting more accurate results than a basic seq2seq model.
+The model is trained in Google Colab with gpu runtime and for training the model to evaluate the output we have used sublime text editor with the cpu hardware configurations of 8th Gen Intel Core i5-8250U CPU@1.60GHz processor and 8GB ram. So these are the environments we used for implementing the model.
+
+4.2.3 Proposed Model Implementation:
+To implement the model we load the cornell movie dataset from the official repository and we import all the necessary packages.We then preprocess the dataset with splitting based on the identifiers and removing punctuations and replacing improper words and stopwords using regular expression in python and appending necessary tokens and filtering the dataset based on threshold length needed and frequency of words.
+We build the vocabulary dictionary and segregating dataset to question and answer and building dictionary for that and forming index to vocabulary dictionary and vocabulary to index dictionary. We then append the <EOS> tag to end of answer sentences and then we compare the sentences with the vocab dictionary if it is not present we then append <UNK> token with the sentence.
+We then transform the dataset to embedding vectors/features using word2vec and the embedding lookup is done to map the vocabulary dictionary to fed into encoder and decoder part of the model. It's also important because this is the part that at every end of the sentence there will be a token to tell the network that the input is finished. For every word in the sentence, it will get the index from the appropriate word in the dictionary and add a token at the end of the sentence.
+We build the encoder model with Bi-directional LSTM with their hidden states collectively fed into the attention model which is a feedforward neural network with a fixed window size with some weights.The Encoder will encode the sentence word by words into an indexed of vocabulary or known words with index, and the decoder will predict the output of the coded input by decoding the input in sequence and will try to use the last input as the next input if its possible. With this method, it is also possible to predict the next input to create a sentence. Each sentence will be assigned a token to mark the end of the sequence. At the end of prediction, there will also be a token to mark the end of the output. So, from the encoder, it will pass a state to the decoder to predict the output.
+The Encoder will encode our input sentence word by word in sequence and in the end there will be a token to mark the end of a sentence. The encoder consists of an Embedding layer and a LSTM layers. The Embedding layer is a lookup table that stores the embedding of our input into a fixed sized dictionary of words. It will be passed to a LSTM layer. LSTMlayer is a Long Short Term Memory that consists of multiple layer type of RNN that will calculate the sequenced input. This layer will calculate the hidden state from the previous one and update the reset, update, and new gates.
+We then build the decoder model with Uni-LSTM with context vectors from the attention mechanism is fed into the decoder model and corresponding outputs are generated with the use of decoder initial state and context vectors and greedy search is also used for improving the model by taking the argmax  of the output (treated as logits) and passes the result through an embedding layer to get the next input. The Decoder will decode the input from the encoder output. It will try to predict the next output and try to use it as the next input if it's possible. The Decoder consists of an Embedding layer, LSTM layer, and a Linear layer. The embedding layer will make a lookup table for the output and passed into a GRU layer to calculate the predicted output state. After that, a Linear layer will help to calculate the activation function to determine the true value of the predicted output.
+We build Bahdanau Attention model with their inputs from the encoder hidden states and generating the context vectors from a fixed window size from the encoder hidden states using a feedforward neural layer and applying a softmax activation function to generate the context vectors.
+We then perform padding and masking the data and we do gradient clipping to prevent gradient explosion problem.We configure the model with Adam optimizer and Sequence loss function and configuring the parameters such as rnn size,embedding size, batch size,epochs,learning rate,etc.
+We split the dataset into train and test dataset with question dictionary fed into encoder model and answer dictionary fed into the decoder model and preparing the validation dataset based on the batch size metioned.
+We train the seq2seq model using InteractiveSession with feeding the data with the help of embedding vectors to predict the correct output.As we created the filtered question and answer list, we create training data (length of 22992) and validation data (We took the length of batch size).
+As we trained the model for three different conversation as we discussed before using Adam optimizer as it can computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradient. We used BidirectionalLSTM is used in encoder side and attention mechanism is used in decoder side to improve model performance.We then compute the average accuracy and average loss by comparing the output generarted with the true words.
+At each step then we update the parameters of the model until minimal loss is achieved.We then tested the model with validation data with feeding the validation data sentences and predicting the output with the true words and measuring the bleu score and taking the average of bleu scores.
+High bleu score measures the accuracy of the model.We then plot the graphs for comparison from diffenent configuration of models.
+
+
+4.4 Frontend Implementation:
+GUI (graphical user interface) was developed using flask app. Flask app that provides a chat interface to the user, to interact with our seq2seq model. The reply method in the code is called via an AJAX request from index.js.It sends the text from user to our seq2seq model, which returns a reply. The reply is passed to index.js and rendered as text in the chat box.
+
+4.5 Implementation Environment:(Dinesh mention the environment refer the research paper)
+
+4.6 Performance analysis metrics:(Abi take care of Bleu score alone,I have given link)
+Bleu score:
+https://towardsdatascience.com/bleu-bilingual-evaluation-understudy-2b4eab9bcfd1
+
+
+Adam optimizer:
+The Adam optimization algorithm is an extension to stochastic gradient descent that has recently seen broader adoption for deep learning applications in computer vision and natural language processing.
+Adam is different to classical stochastic gradient descent.
+Stochastic gradient descent maintains a single learning rate (termed alpha) for all weight updates and the learning rate does not change during training.
+A learning rate is maintained for each network weight (parameter) and separately adapted as learning unfolds.
+The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients.
+The authors describe Adam as combining the advantages of two other extensions of stochastic gradient descent. Specifically:
+Adaptive Gradient Algorithm (AdaGrad) that maintains a per-parameter learning rate that improves performance on problems with sparse gradients (e.g. natural language and computer vision problems).
+Root Mean Square Propagation (RMSProp) that also maintains per-parameter learning rates that are adapted based on the average of recent magnitudes of the gradients for the weight (e.g. how quickly it is changing). This means the algorithm does well on online and non-stationary problems (e.g. noisy). Adam realizes the benefits of both AdaGrad and RMSProp.
+Instead of adapting the parameter learning rates based on the average first moment (the mean) as in RMSProp, Adam also makes use of the average of the second moments of the gradients (the uncentered variance).
+Adam is a replacement optimization algorithm for stochastic gradient descent for training deep learning models. Adam combines the best properties of the AdaGrad and RMSProp algorithms to provide an optimization algorithm that can handle sparse gradients on noisy problems. Adam is relatively easy to configure where the default configuration parameters do well on most problems.
+alpha (in our case lr_rate): Also referred to as the learning rate or step size. The amount that the weights are updated during training is referred to as the step size or the “learning rate.”
+The proportion that weights are updated (e.g. 0.001). Larger values (e.g. 0.3) results in faster initial learning before the rate is updated. Smaller values (e.g. 1.0E-5) slow learning right down during training.
+
+Accuracy:
+Accuracy is defined as the percentage of correct predictions for the test data. It can be calculated easily by dividing the number of correct predictions by the number of total predictions.
+accuracy=(correct predictions)/all predictions
+Based on our project we have computed accuracy based on comparing the predicted answer and real answer
+Lets see how this function works
+np.pad will take the input array and add the padding based on the shape
+np.equalcompare the target and prediction elementwise
+np.meanAverage of the inputs given
+Eg:
+target = [1, 2, 3, 4, 5] print(np.pad(target, (2, 3), 'constant', constant_values=(4, 6))) 
+output: [4 4 1 2 3 4 5 6 6 6] 
+target='Iam good'=[1 5]length=2, logits='Iam doing good'=[1 7 5]length=3 
+if max_seq=3 then target=[1 5 0] (After np.pad-Pad an array.) logits=[1 7 5] 
+take mean to get average accuracy of all batch: 
+compare sentence using np.equal([1, 5, 0], [1, 7 ,5]) output:[ True False False] 
+mean of the result using np.mean(np.equal([1, 5, 0], [1, 7 ,5]))) 
+output:0.3333333333
+
+Loss:
+Sequence loss is a loss function which is just a weighted softmax cross entropy loss function, but it is particularly designed to be applied in time series model (RNN). Weights should be explicitly provided as an argument, and it can be created by TF sequence_mask.
+In this project, TF sequence_mask creates [batch_size, max_target_sequence_length] size of variable, then masks only the first target_sequence_length number of elements to 1. It means parts will have less weight than others.
+It can be implemented using TF contrib.seq2seq.sequence_loss.
+It is a weighted cross-entropy loss for a sequence of logits.
+logits: A Tensor of shape [batch_size, sequence_length, num_decoder_symbols] and dtype float. The logits correspond to the prediction across all classes at each timestep.
+targets: A Tensor of shape [batch_size, sequence_length] and dtype int. The target represents the true class at each timestep.
+weights: A Tensor of shape [batch_size, sequence_length] and dtype float. weights constitutes the weighting of each prediction in the sequence. When using weights as masking, set all valid timesteps to 1 and all padded timesteps to 0, e.g. a mask returned by tf.sequence_mask.
+
+4.6 Challenges:
+Training is a long process which demands higher processing power and configured computing machine. Another problem is finding right hyper parameters to optimize our model. Developing a generic chatbot is really challenging. The model used in this experiment is for machine translation, the dialogue generation is treated as translation problem, where histories of earlier conversations are not taken into account. Hence, the model can be limited in performance regarding long conversation. Many of the output were repetitive and generic. Also, due to lack of real-life quality data the chatbot performed somehow below optimum for imitating human interaction. Also, many utterances were discarded due to longer length or discrepancy.
+
+4.7 Summary:(See the report by dinesh)
+
+
+
+
+

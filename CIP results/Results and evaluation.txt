@@ -1,0 +1,223 @@
+Results:
+
+tables(rows:Average accuracy,Average loss,Bleu score)(colums:config 1,config 2,...,config 10)
+
+Configuration table(rows:Target vocab size,Source vocab size, Vocab size,Embedding size,LSTM-RNN size,Batch size,Number of layer,Learning rate,Learning rate decay,Minimum Learning rate,Keep probability(Threshold),Epochs)
+(colums:config 1,config 2,...,config 10)
+
+Config 1:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 2048
+rnn_size = 1024
+batch_size = 128
+num_layers =  3
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.75
+epochs=50
+
+Result:
+Avg accuracy:0.575
+Avg loss:0.334
+Bleu score:30.99
+
+
+Config 2:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 2048
+rnn_size = 2048
+batch_size = 128
+num_layers =  3
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.8
+epochs=50
+
+Result:
+Avg accuracy:0.533
+Avg loss:0.515
+Bleu score:26.39
+
+
+Config 3:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 1024
+rnn_size = 1024
+batch_size = 512
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.85
+epochs=80
+
+Result:
+Avg accuracy:0.641
+Avg loss:0.129
+Bleu Score:36.13
+
+
+Config 4:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 2048
+rnn_size = 1024
+batch_size = 512
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.90
+epochs=80
+
+Result:
+Avg accuracy:0.639
+Avg loss:0.126
+Bleu score:36.52
+
+Config 5:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 128
+rnn_size = 128
+batch_size = 128
+num_layers = 2 
+learning_rate = 0.001
+learning_rate_decay = 0.9
+min_lr = 0.0001
+keep_prob = 0.8
+epochs=50
+
+Result:
+Avg accuracy:0.344
+Avg loss:1.289
+Bleu score:11.98
+
+
+Config 6:
+Parameters:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 512
+rnn_size = 512
+batch_size = 512
+num_layers =  3
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.75
+epochs=80
+
+
+Result:
+Avg accuracy:0.637
+Avg loss:0.159
+Bleu score:34.77
+
+Config 7:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 512
+rnn_size = 512
+batch_size = 512
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob = 0.85
+epochs=80
+
+Result:
+Avg accuracy:0.639
+Avg loss:0.148
+Bleu Score:35.74
+
+Config 8:
+Params:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 512
+rnn_size = 512
+batch_size = 1024
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob=0.85
+epochs=50
+
+Result:
+Avg accuracy:0.638
+Avg loss:0.189
+Bleu Score:38.67
+
+
+Config 9:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 1024
+rnn_size = 512
+batch_size = 1024
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob=0.90
+epochs=50
+
+Result:
+Avg accuracy:0.629
+Avg loss:0.165
+Bleu Score:38.77
+
+Config 10:
+params:
+target_vocab_size = len(answers_vocabs)
+source_vocab_size = len(questions_vocabs)
+vocab_size = len(index_to_vocabs)+1
+embed_size = 2048
+rnn_size = 1024
+batch_size = 1024
+num_layers =  1
+learning_rate = 0.001
+learning_rate_decay = 0.99
+min_lr = 0.0001
+keep_prob=0.90
+epochs=50
+
+
+Result:
+Avg accuracy:0.634
+Avg loss:0.130
+Bleu Score:39.06
+
+
+
+Seq2Seq model with Attention Mechanism:
+The Seq2Seq model is evaluated using metrics such as accuracy,loss and BLEU score. The main metric of comparison of models is BLEU score as it gives the correct precision of matching of generated sentences to the true sentences.
+The following results show the results for each of configuration defined.
+(Put the results,graphs and generated output for each models)
+Performance Analysis:
+While performing analysis of the various models we tend to find the most precise model with better results and accuracy. We see that model 10 has a bleu score of 39.06 which is high when compared to other models and accuracy is high and loss is also low when compared to other models , so it has high degree of correctness of predictions that match with the true sentences.
+The other models that we have used are having bleu scores in range of 26-40 which is of median level that can still be used.The lowest accuracy model that we have resulted is that model 5 with a BLEU score of 11.98 which is not of high use since it is predicting incorrectly for many sentences. The model 10 is of high BLEU score and according to the BLEU score indicator
+it is in the range of 30-40 mentioning understandable to good translations.Yet we can still achieve high BLEU score but since computation power is essential for achieving that.Compared to other standard models by referring the research papers most of the models are having bleu score within the range of 30-35,but model 10 is more than that and hence can predict more accurately.
+So model 10 is definitely more better than other models and can predict the sentence better than other models.
